@@ -4,7 +4,10 @@ using UnityEngine;
 
 public class MouvementJoueur : MonoBehaviour
 {
-    public float moveSpeed = 3; // Speed at which the character will move
+    public float walkingSpeed;
+    public float runningSpeed;
+    float moveSpeed; // Speed at which the character will move
+    bool isSprinting = false;
     float hInput, vInput; // Horizontal and vertical input
 
     [HideInInspector] public Vector3 direction; // Direction vector
@@ -21,10 +24,12 @@ public class MouvementJoueur : MonoBehaviour
     void Start()
     {
         controller = GetComponent<CharacterController>();
+        moveSpeed = walkingSpeed;
     }
 
     void Update()
     {
+        IsSprinting();
         GetDirectionAndMove();
         Gravity();
     }
@@ -35,11 +40,28 @@ public class MouvementJoueur : MonoBehaviour
     {
         hInput = Input.GetAxis("Horizontal");
         vInput = Input.GetAxis("Vertical");
-        
+    
         direction = transform.forward * vInput + transform.right * hInput; //makes it so that the character will always be facing forward
         controller.Move(direction * moveSpeed * Time.deltaTime);
     }
     
+    void IsSprinting()
+    {
+        if(Input.GetKey(KeyCode.LeftShift)) 
+        {
+            if (!isSprinting)
+            {
+                moveSpeed = runningSpeed;
+                isSprinting = true;
+            }
+            
+        }
+        if(Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            moveSpeed = walkingSpeed;
+            isSprinting = false;
+        }
+    }
     bool isGrounded()
     {
         spherePos = new Vector3(transform.position.x, transform.position.y - groundYOffset, transform.position.z);
