@@ -4,39 +4,60 @@ using UnityEngine;
 
 public class MouvementJoueur : MonoBehaviour
 {
+    public float moveSpeed = 3; // Speed at which the character will move
+    float hInput, vInput; // Horizontal and vertical input
 
-    [SerializeField] private float niveauForce;  // Le niveau de force à appliquer
+    [HideInInspector] public Vector3 direction; // Direction vector
 
-    private Rigidbody _rbody; // Le rigidbody où on applique la force
-    private float _vertical;  // La force verticale
-    private float _horizontal; // La force horizontale
-    private Vector3 _positionDepart;
+    CharacterController controller; //controller of the character
+
+    [SerializeField] float groundYOffset;
+    [SerializeField] LayerMask groundMask;
+    [SerializeField] float gravity = -9.81f;
+
+    Vector3 spherePos;
+    Vector3 velocity;
 
     void Start()
     {
-        _vertical = 0.0f;
-        _horizontal = 0.0f;
-        _rbody = GetComponent<Rigidbody>();
-        _positionDepart = transform.position;
+        controller = GetComponent<CharacterController>();
     }
 
     void Update()
     {
-        _horizontal = Input.GetAxis("Horizontal");
-        _vertical = Input.GetAxis("Vertical");
+        GetDirectionAndMove();
+        Gravity();
     }
 
-    private void FixedUpdate()
+
+    //Method that will get the direction input and make the character move depending on them
+    void GetDirectionAndMove()
     {
-        Vector3 force = new Vector3(_horizontal, 0, _vertical);
-        force *= niveauForce * Time.fixedDeltaTime;
-        _rbody.AddForce(force);
+        hInput = Input.GetAxis("Horizontal");
+        vInput = Input.GetAxis("Vertical");
+        
+        direction = transform.forward * vInput + transform.right * hInput; //makes it so that the character will always be facing forward
+        controller.Move(direction * moveSpeed * Time.deltaTime);
+    }
+    
+    bool isGrounded()
+    {
+        spherePos = new Vector3(transform.position.x, transform.position.y - groundYOffset, transform.position.z);
+        if (Physics.CheckSphere(spherePos, controller.radius - 0.05f, groundMask)) return true;
+        return false;
     }
 
-    public void ReplacerJoueur()
+    void Gravity()
     {
-        transform.position = _positionDepart;
-        _rbody.velocity = Vector3.zero;
-        _rbody.angularVelocity = Vector3.zero;
+        if (!isGrounded())
+        {
+            velocity.y += gravity * Time.deltaTime;
+        }
+        else if (velocity.y < 0) velocity.y = -2;
+
+        controller.Move(velocity * Time.deltaTime);
     }
+
+
+
 }
