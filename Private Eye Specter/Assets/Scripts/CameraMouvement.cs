@@ -22,13 +22,10 @@ public class CameraMouvement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-         hRotation = horizontalSpeed * Input.GetAxis("Mouse X");
-         vRotation = verticalSpeed * Input.GetAxis("Mouse Y");
     }
 
     private void LateUpdate()
     {
-        transform.Rotate(0, hRotation, 0);
-        camTarget.Rotate(-vRotation, 0, 0);
+      
     }
 }
